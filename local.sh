@@ -1,0 +1,99 @@
+#!/bin/bash
+
+if [[ $(id -u) != "0" ]]; then
+   echo "Please run as root (or use sudo)"
+   exit 1 
+fi
+
+cd "$(dirname "$0")" || exit 1
+
+#=============================================================================
+#================================= CONSTANTS =================================
+#=============================================================================
+
+RED='\033[0;31m'
+NC='\033[0m'
+
+DEFAULT_IMAGE_NAME="so2/so2-assignments"
+DEFAULT_TAG='latest'
+DEFAULT_REGISTRY='gitlab.cs.pub.ro:5050'
+SO2_WORKSPACE="/linux/tools/labs"
+SO2_VOLUME="SO2_DOCKER_VOLUME"
+#=============================================================================
+#=================================== UTILS ===================================
+#=============================================================================
+
+LOG_INFO() {
+    echo -e "[$(date +%FT%T)] [INFO] $1"
+}
+
+LOG_FATAL() {
+    echo -e "[$(date +%FT%T)] [${RED}FATAL${NC}] $1"
+    exit 1
+}
+
+#=============================================================================
+#=============================================================================
+#=============================================================================
+
+print_help() {
+    echo "Usage:"
+    echo "local.sh docker interactive [--privileged]"
+    echo ""
+    echo "      --privileged - run a privileged container. This allows the use of KVM (if available)"
+    echo ""
+}
+
+docker_interactive() {
+    local full_image_name="${DEFAULT_REGISTRY}/${DEFAULT_IMAGE_NAME}:${DEFAULT_TAG}"
+    local executable="/bin/bash"
+    local registry=${DEFAULT_REGISTRY}
+
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+        --privileged)
+            privileged=--privileged
+            ;;
+        *)
+            print_help
+            exit 1
+        esac
+        shift
+    done
+
+    if [[ $(docker images -q $full_image_name 2> /dev/null) == "" ]]; then
+        docker pull $full_image_name
+    fi
+
+    if ! docker volume inspect $SO2_VOLUME >/dev/null 2>&1; then
+        echo "Volume $SO2_VOLUME does not exist."
+        echo "Creating it"
+        docker volume create $SO2_VOLUME 
+    fi
+
+    echo "The /linux directory is made persistent within the $SO2_VOLUME:"
+    docker inspect $SO2_VOLUME
+
+    docker run $privileged --rm -it --cap-add=NET_ADMIN --device /dev/net/tun:/dev/net/tun \
+    -v $SO2_VOLUME:/linux \
+    --workdir "$SO2_WORKSPACE" \
+        "$full_image_name" "$executable"
+
+}
+
+docker_main() {
+    if [ "$1" = "interactive" ] ; then
+        shift
+        docker_interactive "$@"
+    fi
+}
+
+
+if [ "$1" = "docker" ] ; then
+    shift
+    docker_main "$@"
+elif [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    print_help
+else
+    print_help
+fi
