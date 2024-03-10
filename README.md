@@ -63,6 +63,26 @@ $ make build
 > You DO NOT need to reboot the VM each time you build modules.
 > But if you want to stop the Virtual Machine use the following key combination `Ctrl + A then q`.
 
+# Searching Symbols Using VIM + CSCOPE
+The kernel compiled within the Docker image also features a cscope database, which you can utilize with vim for symbol searching.
+TODO: add commands
+
+# Using VSCode
+Even though we love `vim`, it's not the only editor out there.
+If you want something fancier, you can use VSCode.
+To accomplish this, you'll need to access the directory where the `/linux` tree is mounted on your host system.
+This information is displayed at the beginning when you execute the `local.sh` script.
+
+![VScode](./img/VScode.png)
+
+You will probably need to start VScode as the `root` user:
+```
+sudo code --no-sandbox --user-data-dir /root
+```
+
+And from this point you only need to open the directory listed above at the "Mountpoint" field.
+In our case is `/var/lib/docker/volumes/SO2_DOCKER_VOLUME/_data`
+
 # TMUX cheatsheet
 
 * Vertical Split: `Ctrl + b then SHIFT + %`
