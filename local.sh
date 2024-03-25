@@ -41,6 +41,7 @@ print_help() {
     echo "local.sh docker interactive [--privileged]"
     echo ""
     echo "      --privileged - run a privileged container. This allows the use of KVM (if available)"
+    echo "      --allow-gui - run the docker such that it can open GUI apps"
     echo ""
 }
 
@@ -53,6 +54,9 @@ docker_interactive() {
         case $1 in
         --privileged)
             privileged=--privileged
+            ;;
+        --allow-gui)
+            allow_gui=true
             ;;
         *)
             print_help
@@ -74,10 +78,18 @@ docker_interactive() {
     echo "The /linux directory is made persistent within the $SO2_VOLUME:"
     docker inspect $SO2_VOLUME
 
-    docker run $privileged --rm -it --cap-add=NET_ADMIN --device /dev/net/tun:/dev/net/tun \
-    -v $SO2_VOLUME:/linux \
-    --workdir "$SO2_WORKSPACE" \
+    if $allow_gui; then
+        docker run --privileged --rm -it \
+        --net=host --env="DISPLAY" --volume="$XAUTHORITY:/root/.Xauthority:rw" \
+        -v $SO2_VOLUME:/linux \
+        --workdir "$SO2_WORKSPACE" \
         "$full_image_name" "$executable"
+    else
+        docker run $privileged --rm -it --cap-add=NET_ADMIN --device /dev/net/tun:/dev/net/tun \
+        -v $SO2_VOLUME:/linux \
+        --workdir "$SO2_WORKSPACE" \
+        "$full_image_name" "$executable"
+    fi
 
 }
 
