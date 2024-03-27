@@ -79,11 +79,12 @@ make gui
 
 Only on WSL, we need to instsall an X11 server:
 Just download it from [here](https://sourceforge.net/projects/vcxsrv/) and launch the installer.
-After installing it, run the XLaunch app and make sure you select the following checkbox
+After installing it, run the XLaunch app and make sure you select the following checkbox.
+Make sure the XLaunch app is running!
 
 ![XLaunch](./img/XLaunch.png)
 
-"Also, ensure that both of the VcXsrv checkboxes are checked in the Windows Firewall Manager."
+Also, ensure that both of the VcXsrv checkboxes are checked in the Windows Firewall Manager.
 ![XLaunch2](./img/XLaunch2.png)
 
 Now, you should be able to run the `make gui` command.
