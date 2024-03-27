@@ -72,7 +72,9 @@ docker_interactive() {
     if ! docker volume inspect $SO2_VOLUME >/dev/null 2>&1; then
         echo "Volume $SO2_VOLUME does not exist."
         echo "Creating it"
-        docker volume create $SO2_VOLUME 
+	docker volume create $SO2_VOLUME
+	local vol_mount=$(docker inspect $SO2_VOLUME | grep -i mountpoin | cut -d : -f2 | cut -d, -f1)
+	chmod 777 -R $vol_mount
     fi
 
     echo "The /linux directory is made persistent within the $SO2_VOLUME:"
@@ -85,6 +87,17 @@ docker_interactive() {
         -v $SO2_VOLUME:/linux \
         --workdir "$SO2_WORKSPACE" \
         "$full_image_name" sed "s+\${QEMU_DISPLAY:-\"sdl\"+\${QEMU_DISPLAY:-\"gtk\"+g" -i /linux/tools/labs/qemu/run-qemu.sh
+
+	# wsl
+	if cat /proc/version | grep -i microsoft &> /dev/null ; then
+		export DISPLAY="$(ip r show default | awk '{print $3}'):0.0"
+	fi
+
+	if [[ $DISPLAY == "" ]]; then
+		echo "Error: Something unexpected happend. The environment var DISPLAY is not set. Consider setting it with"
+		echo -e "\texport DISPLAY=<dispaly>"
+		exit 1
+	fi
 
 	local xauth_var=$(echo $(xauth info | grep Auth | cut -d: -f2))
         docker run --privileged --rm -it \

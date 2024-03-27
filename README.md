@@ -63,6 +63,36 @@ $ make build
 > You DO NOT need to reboot the VM each time you build modules.
 > But if you want to stop the Virtual Machine use the following key combination `Ctrl + A then q`.
 
+# Starting the VM (inside the docker) with qemu display
+Start the Docker using the following command
+```
+$ sudo ./local.sh docker interactive --allow-gui
+```
+
+> **Warning**
+> If you're running on WSL you should follow the steps listed below, before starting the VM!
+
+Start the VM with the following command (inside the docker)
+```
+make gui
+```
+
+Only on WSL, we need to instsall an X11 server:
+Just download it from [here](https://sourceforge.net/projects/vcxsrv/) and launch the installer.
+After installing it, run the XLaunch app and make sure you select the following checkbox
+
+![XLaunch](./img/XLaunch.png)
+
+"Also, ensure that both of the VcXsrv checkboxes are checked in the Windows Firewall Manager."
+![XLaunch2](./img/XLaunch2.png)
+
+Now, you should be able to run the `make gui` command.
+
+> **Warning**
+> Just as in the case of `make console`, you DO NOT need to reboot the VM each time you build modules.
+> But if you want to stop the Virtual Machine, use the following key combination `Ctrl + A then q` (in the console, not in the qemu display).
+> To escape the mouse from the qemu display use `Ctrl + Alt + g`
+
 # Searching Symbols Using VIM + CSCOPE
 The kernel compiled within the Docker image also features a cscope database, which you can utilize with vim for symbol searching.
 TODO: add commands
@@ -70,7 +100,13 @@ TODO: add commands
 # Using VSCode
 Even though we love `vim`, it's not the only editor out there.
 If you want something fancier, you can use VSCode.
-To accomplish this, you'll need to access the directory where the `/linux` tree is mounted on your host system.
+To accomplish this there are two ways, you'll need to access the directory where the `/linux` tree is mounted.
+
+## Option 1 (Suitable for WSL and Linux)
+Install the `Dev Containers` and `WSL` extensions in VScode, attach to the container, and open the `/linux` directory.
+
+## Option 2 (Suitable for Linux)
+Open the mountpoint of the volume from the host.
 This information is displayed at the beginning when you execute the `local.sh` script.
 
 ![VScode](./img/VScode.png)
