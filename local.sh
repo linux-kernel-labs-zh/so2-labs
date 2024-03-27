@@ -79,8 +79,16 @@ docker_interactive() {
     docker inspect $SO2_VOLUME
 
     if $allow_gui; then
+	
+	# TODO: remove this after you change sdl to gtk in qemu-runqemu.sh
+ 	docker run $privileged --rm -it --cap-add=NET_ADMIN --device /dev/net/tun:/dev/net/tun \
+        -v $SO2_VOLUME:/linux \
+        --workdir "$SO2_WORKSPACE" \
+        "$full_image_name" sed "s+\${QEMU_DISPLAY:-\"sdl\"+\${QEMU_DISPLAY:-\"gtk\"+g" -i /linux/tools/labs/qemu/run-qemu.sh
+
+	local xauth_var=$(echo $(xauth info | grep Auth | cut -d: -f2))
         docker run --privileged --rm -it \
-        --net=host --env="DISPLAY" --volume="$XAUTHORITY:/root/.Xauthority:rw" \
+        --net=host --env="DISPLAY" --volume="${xauth_var}:/root/.Xauthority:rw" \
         -v $SO2_VOLUME:/linux \
         --workdir "$SO2_WORKSPACE" \
         "$full_image_name" "$executable"
