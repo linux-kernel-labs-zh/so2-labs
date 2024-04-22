@@ -1,141 +1,138 @@
-# SO2 laboratory auxiliar infrastructure
-The provided repository includes a script for launching a Docker container equipped with a compiled [Linux Kernel](https://github.com/linux-kernel-labs/linux), as utilized in the SO2 laboratories.
+# SO2 实验室辅助基础设施
 
-# Quick Start
-To start the Docker simply run
-```
-# If you run on Linux
+本仓库包括一个脚本，用于启动一个 Docker 容器，该容器配备有编译好的 [Linux 内核](https://github.com/linux-kernel-labs/linux)，用于 SO2 实验。
+
+# 快速开始
+
+要启动 Docker，请运行以下命令：
+
+```bash
+# 如果在 Linux 上运行
 $ sudo ./local.sh docker interactive --privileged
-# If you run on WSL
-$ sudo ./local.sh docker interactive 
+# 如果在 WSL 上运行
+$ sudo ./local.sh docker interactive
 ```
 
-If errors occur please see  [How to solve errors](#how-to-solve-errors)
+如果出现错误，请参阅[如何解决错误](#如何解决错误)。
 
-> **Warning**
-> The first time you use the previous command it will take a while because the script will pull the image from the [registry](https://gitlab.cs.pub.ro/so2/so2-assignments/container_registry).
-> The `--privileged` argument allows the use of KVM if you're runing Linux natively.
+> [!WARNING]
+> 第一次运行上述命令时，会花费一些时间，因为脚本将从[注册表](https://gitlab.cs.pub.ro/so2/so2-assignments/container_registry)中获取镜像。如果你直接在物理机上运行 Linux，则借助 `--privileged` 参数你可以使用 KVM。
 
-Upon successful execution of the command, you will be presented with a Docker shell prompt:
+成功执行该命令后，你将看到 Docker shell 提示：
+
 ![docker_shell](./img/docker_shell.png)
 
+请注意，在 Docker 环境中的 `/linux` 目录会挂载到 Docker 卷，以确保在 `/linux` 目录中进行的任何修改都会持久保存（即使容器停止）。此外要注意，在 Docker 环境中的工作目录是 `/linux/tools/labs`。这个目录是我们编译模块和启动虚拟机的地方。你至少需要两个 Docker 内部的终端。一个用于编译，一个用于虚拟机控制台。建议使用 `tmux`（查看 [TMUX 速查表](#tmux-速查表)小节）。你只需输入以下命令：
 
-Note that the `/linux` directory within the Docker environment is mounted to a Docker volume, ensuring that any modifications made within the `/linux` directory persist (even if you stop the container).
-Also, it's important to note that the working directory within the Docker environment is `/linux/tools/labs`.
-This directory is where we will compile modules and start the Virtual Machine.
-You will need at least two terminals inside the Docker.
-One for compiling, and one for the Virtual Machine console.
-For this we recommend `tmux` (Go to section [TMUX cheatsheet](#tmux-cheatsheet)).
-Simply type the following command:
-```
+```bash
 $ tmux
 ```
 
-You should see a similar output:
+你应该会看到类似的输出：
 
 ![docker_tmux](./img/docker_tmux.png)
 
-To generate the skeleton for the current laboratory, simply execute the following command, replacing `<lab_name>` with the corresponding laboratory name:
-```
-$ LABS=<lab name> make skels
+要为当前实验生成骨架，请执行以下命令，注意将 `<实验名称>` 替换为相应的实验名称：
+
+```bash
+$ LABS=<实验名称> make skels
 ```
 
-Next, to start the SO2 VM simply run:
-```
+接下来，要启动 SO2 虚拟机，只需运行：
+
+```bash
 make console
 ```
-You might need to wait a few seconds.
-Use the `root` username for logging in.
 
-If everything went well you should see something similar:
+你可能需要等待几秒钟。记得使用 `root` 用户名登录。
+
+如果一切顺利，你应该会看到类似的内容：
 
 ![docker_tmux_VM](./img/docker_tmux_VM.png)
 
-In the upper pane, we're operating within the VM, while in the lower pane, we're inside Docker.
-The `skels` directory is shared between the Docker container and the VM.
-Our workflow involves building modules within Docker and then inserting them to the virtual machine via `insmod` or removing them via `rmmod`.
-To initiate the module building process run the following command inside the Docker:
-```
+在上面的窗格中，我们在虚拟机内操作，在下面的窗格中，我们在 Docker 内操作。`skels` 目录在 Docker 容器和虚拟机之间共享。我们的工作流程包括在 Docker 内构建模块，然后通过 `insmod` 命令将它们插入虚拟机，或者通过 `rmmod` 将它们移除。要启动模块构建过程，请在 Docker 内运行以下命令：
+
+```bash
 $ make build
 ```
 
-> **Warning**
-> You DO NOT need to reboot the VM each time you build modules.
-> But if you want to stop the Virtual Machine use the following key combination `Ctrl + A then q`.
+> [!WARNING]
+> 每次构建模块时，你**无需**重新启动虚拟机。但是，如果你想停止虚拟机，请先按下组合键 `Ctrl + A`，然后按下 `q`。
 
-# Starting the VM (inside the docker) with qemu display
-Start the Docker using the following command
-```
+# 使用 qemu 显示启动虚拟机（在 Docker 内）
+
+使用以下命令启动 Docker：
+
+```bash
 $ sudo ./local.sh docker interactive --allow-gui
 ```
 
-> **Warning**
-> If you're running on WSL you should follow the steps listed below, before starting the VM!
+> [!WARNING]
+> 如果你正在使用 WSL，请在启动虚拟机之前按照以下步骤进行操作！
 
-Start the VM with the following command (inside the docker)
-```
+（在 Docker 内）使用以下命令启动虚拟机：
+
+```bash
 make gui
 ```
 
-Only on WSL, we need to instsall an X11 server:
-Just download it from [here](https://sourceforge.net/projects/vcxsrv/) and launch the installer.
-After installing it, run the XLaunch app and make sure you select the following checkbox.
-Make sure the XLaunch app is running!
+只有在 WSL 上，我们才需要安装 X11 服务器：从[这里](https://sourceforge.net/projects/vcxsrv/)下载并运行安装程序。安装完成后，运行 XLaunch 应用程序，并确保选中以下复选框。务必确保 XLaunch 应用程序正在运行！
 
 ![XLaunch](./img/XLaunch.png)
 
-Also, ensure that both of the VcXsrv checkboxes are checked in the Windows Firewall Manager.
+还有，要确保在 Windows 防火墙管理器中选中了 VcXsrv 的两个复选框。
+
 ![XLaunch2](./img/XLaunch2.png)
 
-Now, you should be able to run the `make gui` command.
+现在，你应该可以运行 `make gui` 命令了。
 
-> **Warning**
-> Just as in the case of `make console`, you DO NOT need to reboot the VM each time you build modules.
-> But if you want to stop the Virtual Machine, use the following key combination `Ctrl + A then q` (in the console, not in the qemu display).
-> To escape the mouse from the qemu display use `Ctrl + Alt + g`
+> [!WARNING]
+> 就像使用 `make console` 时一样，每次构建模块时**无需**重新启动虚拟机。但是，如果你想停止虚拟机，请按下组合键 `Ctrl + A`，然后按下 `q`（在控制台中按下，而不是在 qemu 显示中）。要释放处于 qemu 显示区域的鼠标，请使用 `Ctrl + Alt + g`。
 
-# Searching Symbols Using VIM + CSCOPE
-The kernel compiled within the Docker image also features a cscope database, which you can utilize with vim for symbol searching.
-TODO: add commands
+# 使用 VIM + CSCOPE 搜索符号
 
-# Using VSCode
-Even though we love `vim`, it's not the only editor out there.
-If you want something fancier, you can use VSCode.
-To accomplish this there are two ways, you'll need to access the directory where the `/linux` tree is mounted.
+在 Docker 镜像中编译的内核还包含一个 cscope 数据库，你可以使用 vim 来利用其进行符号搜索。TODO：添加命令
 
-## Option 1 (Suitable for WSL and Linux)
-Install the `Dev Containers` and `WSL` extensions in VScode, attach to the container, and open the `/linux` directory.
+# 使用 VSCode
 
-## Option 2 (Suitable for Linux)
-Open the mountpoint of the volume from the host.
-This information is displayed at the beginning when you execute the `local.sh` script.
+尽管我们爱 `vim`，但它并不是唯一的编辑器。如果你需要更加高级的编辑器，可以使用 VSCode。为了使用 VSCode，我们有两种方法，你需要访问 `/linux` 树所挂载的目录。
+
+## 选项 1（适用于 WSL 和 Linux）
+
+在 VSCode 中安装 `Dev Containers` 和 `WSL` 扩展，连接到容器，并打开 `/linux` 目录。
+
+## 选项 2（适用于 Linux）
+
+打开主机上的卷挂载点。当你执行 `local.sh` 脚本时，这些信息将显示在开头。
 
 ![VScode](./img/VScode.png)
 
-You will probably need to start VScode as the `root` user:
-```
+你可能需要以 `root` 用户身份启动 VSCode：
+
+```bash
 sudo code --no-sandbox --user-data-dir /root
 ```
 
-And from this point you only need to open the directory listed above at the "Mountpoint" field.
-In our case is `/var/lib/docker/volumes/SO2_DOCKER_VOLUME/_data`
+之后，你只需要打开上面在“Mountpoint”字段中列出的目录。在本情况下，它是 `/var/lib/docker/volumes/SO2_DOCKER_VOLUME/_data`。
 
-# TMUX cheatsheet
+# TMUX 速查表
 
-* Vertical Split: `Ctrl + b then SHIFT + %`
-* Horizontal Split: `Ctrl + b then SHIFT + "`
-* SWitch to pane: `Ctrl + b then Arrow Keys`
-* Deleting pane: `Ctrl + d`
-* Zoom in pane: `Ctrl + b then z`
-* Zoom out pane: `Ctrl + b then z`
+* 垂直分割： `Ctrl + b` 然后 `SHIFT + %`
+* 水平分割： `Ctrl + b` 然后 `SHIFT + "`
+* 切换到面板： `Ctrl + b` 然后使用方向键
+* 删除面板： `Ctrl + d`
+* 放大面板： `Ctrl + b` 然后 `z`
+* 缩小面板： `Ctrl + b` 然后 `z`
 
-# How to solve errors
+# 如何解决错误
 
-* If `./local.sh docker interactive` seems to block, consider killing it (CTRL + c) and rerun it
-* If the `/linux/tools/labs` directory is empty consider removing the volume and rerun the script:
-```
+* 如果 `./local.sh docker interactive` 看起来阻塞了，考虑终止它（CTRL + c）并重新运行
+* 如果 `/linux/tools/labs` 目录是空的，请考虑删除卷并重新运行脚本：
+
+```bash
 $ docker volume rm SO2_DOCKER_VOLUME
 $ ./local.sh docker interactive
 ```
-* If you encounter the "bad interpreter" error while attempting to run a script on WSL try [this](https://stackoverflow.com/questions/14219092/bash-script-bin-bashm-bad-interpreter-no-such-file-or-directory)
-* If you encounter any other unexpected issues, consider restarting the container.
+
+* 如果尝试在 WSL 上运行脚本时遇到“bad interpreter”错误，请参考[这个链接](https://stackoverflow.com/questions/14219092/bash-script-bin-bashm-bad-interpreter-no-such-file-or-directory)
+* 如果遇到其他意外问题，请考虑重新启动容器。
