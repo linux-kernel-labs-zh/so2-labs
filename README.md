@@ -15,7 +15,7 @@ $ sudo ./local.sh docker interactive
 
 如果出现错误，请参阅[如何解决错误](#如何解决错误)。
 
-> **Warning**
+> [!WARNING]
 > 第一次运行上述命令时，会花费一些时间，因为脚本将从[注册表](https://gitlab.cs.pub.ro/so2/so2-assignments/container_registry)中获取镜像。如果你直接在物理机上运行 Linux，则借助 `--privileged` 参数你可以使用 KVM。
 
 成功执行该命令后，你将看到 Docker shell 提示：
@@ -56,7 +56,7 @@ make console
 $ make build
 ```
 
-> **Warning**
+> [!WARNING]
 > 每次构建模块时，你**无需**重新启动虚拟机。但是，如果你想停止虚拟机，请先按下组合键 `Ctrl + A`，然后按下 `q`。
 
 # 使用 qemu 显示启动虚拟机（在 Docker 内）
@@ -67,7 +67,7 @@ $ make build
 $ sudo ./local.sh docker interactive --allow-gui
 ```
 
-> **Warning**
+> [!WARNING]
 > 如果你正在使用 WSL，请在启动虚拟机之前按照以下步骤进行操作！
 
 （在 Docker 内）使用以下命令启动虚拟机：
@@ -86,7 +86,7 @@ make gui
 
 现在，你应该可以运行 `make gui` 命令了。
 
-> **Warning**
+> [!WARNING]
 > 就像使用 `make console` 时一样，每次构建模块时**无需**重新启动虚拟机。但是，如果你想停止虚拟机，请按下组合键 `Ctrl + A`，然后按下 `q`（在控制台中按下，而不是在 qemu 显示中）。要释放处于 qemu 显示区域的鼠标，请使用 `Ctrl + Alt + g`。
 
 # 使用 VIM + CSCOPE 搜索符号
